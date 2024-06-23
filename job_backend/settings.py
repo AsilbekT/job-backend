@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,15 +29,17 @@ ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = 'accounts.Account'
 CSRF_TRUSTED_ORIGINS = [
-    "https://f819-84-54-84-33.ngrok-free.app", "http://localhost:3000"]
+    "https://job-backend.prisunion.uz", "http://localhost:3000"]
 
 CORS_ALLOWED_ORIGINS = [
+    "https://job-backend.prisunion.uz",
     "http://localhost:8080",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:3000",
 ]
 CORS_ORIGIN_WHITELIST = [
+    "https://job-backend.prisunion.uz",
     'http://localhost:3000',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
@@ -141,10 +143,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# Ensure you have the STATIC_URL setting as well
+STATIC_URL = '/static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
