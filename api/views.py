@@ -131,12 +131,14 @@ class AccountViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Account.objects.filter(id=self.request.user.id)
 
+    def get_serializer_context(self):
+        return {'request': self.request}
+
     @action(detail=True, methods=['patch'], permission_classes=[IsAuthenticated])
     def upload_files(self, request, pk=None):
         try:
             account = self.get_object()
-            serializer = self.get_serializer(
-                account, data=request.data, partial=True)
+            serializer = self.get_serializer(account, data=request.data, partial=True, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response({"detail": "Account updated successfully."})
@@ -176,12 +178,14 @@ class ResumeListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user
-        existing_resumes = Resume.objects.filter(
-            user=user, title=serializer.validated_data.get('title'))
+        existing_resumes = Resume.objects.filter(user=user, title=serializer.validated_data.get('title'))
         if existing_resumes.exists():
-            raise serializers.ValidationError(
-                "A resume with the same title already exists.")
+            raise serializers.ValidationError("A resume with the same title already exists.")
         serializer.save(user=user)
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
 
 
 class ResumeDestroyView(generics.DestroyAPIView):

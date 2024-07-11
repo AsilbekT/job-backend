@@ -19,9 +19,15 @@ class ResumeSerializer(serializers.ModelSerializer):
         validated_data['user'] = request.user
         return super().create(validated_data)
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        if instance.resume and request:
+            url = request.build_absolute_uri(instance.resume.url)
+            representation['resume'] = url.replace("http://", "https://")
+        return representation
 
 class AccountSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(required=False)
     resumes = ResumeSerializer(many=True, read_only=True)
 
     class Meta:
@@ -41,6 +47,14 @@ class AccountSerializer(serializers.ModelSerializer):
             'resumes'
         ]
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        if instance.avatar and request:
+            url = request.build_absolute_uri(instance.avatar.url)
+            https_url = url.replace("http://", "https://")
+            representation['avatar'] = https_url
+        return representation
 
 class CompanySerializer(serializers.ModelSerializer):
     company_logo = serializers.SerializerMethodField()
@@ -52,7 +66,9 @@ class CompanySerializer(serializers.ModelSerializer):
     def get_company_logo(self, obj):
         request = self.context.get('request')
         if obj.company_logo and request:
-            return request.build_absolute_uri(obj.company_logo.url)
+            # return request.build_absolute_uri(obj.company_logo.url)
+            url = request.build_absolute_uri(obj.company_logo.url)
+            return url.replace("http://", "https://")
         return None
 
 
@@ -87,7 +103,9 @@ class JobSerializer(serializers.ModelSerializer):
     def get_logo(self, obj):
         request = self.context.get('request')
         logo_url = obj.company.company_logo.url
-        return request.build_absolute_uri(logo_url)
+        # return request.build_absolute_uri(logo_url)
+        url = request.build_absolute_uri(logo_url)
+        return url.replace("http://", "https://")
 
     def get_link(self, obj):
         # This assumes that you have a detail view for your Company model
@@ -106,28 +124,6 @@ class JobSerializer(serializers.ModelSerializer):
         minutes = (diff.total_seconds() % 3600) // 60
 
         return f"{int(hours)} hours, {int(minutes)} minutes ago"
-
-
-class AccountSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(required=False)
-    resumes = ResumeSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Account
-        fields = [
-            'id',
-            'email',
-            'username',
-            'date_joined',
-            'avatar',
-            'last_login',
-            'is_admin',
-            'is_active',
-            'is_staff',
-            'is_superuser',
-            'is_employer',
-            'resumes'
-        ]
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
